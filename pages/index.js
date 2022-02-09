@@ -1,5 +1,8 @@
+import axios from "axios";
 import React, { useState, useEffect } from "react";
 import TweetCard from "../components/TweetCard";
+import Router from "next/router";
+
 
 const categories = [
   "Tech",
@@ -15,34 +18,14 @@ const categories = [
   "Cloud",
   "Tip & Tricks",
 ];
-
-export default function Home() {
+const options =["All",...categories]
+export default function Home({tweets}) {
   const [id, setId] = useState("");
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState("Tech");
+  const [selected,setSelected] = useState("")
+  const [allTweets,setAllTweets] = useState(tweets)
 
-  const [data, setData] = useState([
-    {
-      id: "1479877351181897734",
-      category: "React",
-    },
-    {
-      id: "1480048723077988355",
-      category: "Lifestyle",
-    },
-    {
-      id: "1479909522609086464",
-      category: "JS",
-    },
-    {
-      id: "1480043181425135618",
-      category: "Programming",
-    },
-    {
-      id: "1479783923899064323",
-      category: "Cricket",
-    },
-  ]);
-
+ 
   const handleChange = (e) => {
     if (e.target.name == "id") {
       setId(e.target.value);
@@ -51,15 +34,31 @@ export default function Home() {
     }
   };
 
-  const handleSubmit = (e) => {
-    console.log("Inside Submit");
-    e.preventDefault();
-    const newItem = { id, category };
-    const newData = [...data, newItem];
-    setData(newData);
+  const handleSelection=(event)=>{
+    console.log(event.target.innerHTML);
+    const filteredTweets = tweets.filter(
+      (item) => item.category == event.target.innerHTML
+    );
+    setAllTweets(filteredTweets)
+  }
+
+  console.log(allTweets);
+
+  const handleSubmit = async(e) => {
+    const body = { tweetid: id, category: category };
+    try {
+      const {data} = await axios.post(`/api/tweet`, body);
+      console.log(data.message);
+      Router.reload(window.location.pathname);
+      
+    } catch (error) { 
+      alert(error)
+      
+    }
+
   };
 
-  console.log(data);
+
 
   return (
     <div className="container mx-auto w-4/5 pt-3">
@@ -91,9 +90,9 @@ export default function Home() {
                 </option>
               ))}
             </select>
-            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
               <svg
-                class="fill-current h-4 w-4"
+                className="fill-current h-4 w-4"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 20 20"
               >
@@ -114,20 +113,29 @@ export default function Home() {
 
       {/* A section with various categories which will sort the tweets */}
       <div className="mx-3 mt-3">
-        {categories.map((item) => (
+        {options.map((item,index) => (
           <button
-            key={item}
+            key={index}
             className="bg-blue-500 hover:bg-blue-700 text-white font-normal py-1 px-3 rounded focus:outline-none focus:shadow-outline mr-3 mb-3"
+            onClick={(e)=>handleSelection(e)}
           >
             {item}
           </button>
         ))}
       </div>
       <div className="container mx-auto">
-        <div className="grid grid-cols-3 gap-4">
-          {data && data.map((item) => <TweetCard key={item.id} id={item.id} />)}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {allTweets && allTweets.map((item) => <TweetCard key={item._id} id={item.tweetid} />)}
         </div>
       </div>
     </div>
   );
+}
+export async function getServerSideProps() {
+  
+  const res = await axios.get(`${process.env.API_URL}/api/tweet`)
+  const {data} = res
+  return{
+    props:data
+  }
 }
