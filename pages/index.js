@@ -18,11 +18,11 @@ const categories = [
   "Cloud",
   "Tip & Tricks",
 ];
-const options =["All",...categories]
+
 export default function Home({tweets}) {
   const [id, setId] = useState("");
   const [category, setCategory] = useState("Tech");
-  const [selected,setSelected] = useState("")
+  const [selected,setSelected] = useState("All")
   const [allTweets,setAllTweets] = useState(tweets)
 
  
@@ -35,20 +35,30 @@ export default function Home({tweets}) {
   };
 
   const handleSelection=(event)=>{
-    console.log(event.target.innerHTML);
-    const filteredTweets = tweets.filter(
-      (item) => item.category == event.target.innerHTML
-    );
-    setAllTweets(filteredTweets)
+
+    if (event.target.innerHTML == 'All') {
+      setAllTweets(tweets);
+      setSelected("All")
+    }
+    else{
+          const filteredTweets = tweets.filter(
+            (item) => item.category == event.target.innerHTML
+          );
+          setAllTweets(filteredTweets);
+          setSelected(event.target.innerHTML)
+    }
+
   }
 
-  console.log(allTweets);
 
   const handleSubmit = async(e) => {
+    if(id =="" || category ==""){
+      alert("Empty values not allowed")
+      return;
+    }
     const body = { tweetid: id, category: category };
     try {
       const {data} = await axios.post(`/api/tweet`, body);
-      console.log(data.message);
       Router.reload(window.location.pathname);
       
     } catch (error) { 
@@ -58,7 +68,13 @@ export default function Home({tweets}) {
 
   };
 
+  const activeBtn =
+    "bg-blue-600 hover:bg-blue-800 border-blue-500 border text-white font-normal py-1 px-3 rounded focus:outline-none focus:shadow-outline mr-3 mb-3";
 
+    // const inactiveBtn =
+    // "bg-blue-400 hover:bg-blue-800  text-white font-normal py-1 px-3 rounded focus:outline-none focus:shadow-outline";
+  const inactiveBtn =
+    " bg-white border  mr-3 mb-3 border-blue-500 rounded py-1 px-3 text-blue-500 hover:bg-blue-600 hover:text-white hover:border-blue:700";
 
   return (
     <div className="container mx-auto w-4/5 pt-3">
@@ -69,7 +85,7 @@ export default function Home({tweets}) {
         <div className="w-full md:w-2/5 px-3">
           <input
             placeholder="Tweet ID"
-            className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+            className="appearance-none block w-full bg-gray-100 text-gray-700 border border-gray-100 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
             name="id"
             onChange={(e) => handleChange(e)}
             value={id}
@@ -80,7 +96,7 @@ export default function Home({tweets}) {
             <select
               id="category"
               name="category"
-              className="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+              className="block appearance-none w-full bg-gray-100 border border-gray-100 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
               value={category}
               onChange={(e) => handleChange(e)}
             >
@@ -101,9 +117,9 @@ export default function Home({tweets}) {
             </div>
           </div>
         </div>
-        <div className="w-full md:w-1/5 px-3">
+        <div className="w-full md:w-1/5 px-3 mt-3 md:mt-0">
           <button
-            className="bg-blue-500 hover:bg-blue-700 text-white font-normal py-2 px-6 rounded focus:outline-none focus:shadow-outline"
+            className="bg-blue-700 hover:bg-blue-700 text-white font-normal py-2 px-6 rounded focus:outline-none focus:shadow-outline"
             onClick={(e) => handleSubmit(e)}
           >
             Add
@@ -113,11 +129,17 @@ export default function Home({tweets}) {
 
       {/* A section with various categories which will sort the tweets */}
       <div className="mx-3 mt-3">
-        {options.map((item,index) => (
+        <button
+          className={selected == "All" ? activeBtn : inactiveBtn}
+          onClick={(e) => handleSelection(e)}
+        >
+          All
+        </button>
+        {categories.map((item, index) => (
           <button
             key={index}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-normal py-1 px-3 rounded focus:outline-none focus:shadow-outline mr-3 mb-3"
-            onClick={(e)=>handleSelection(e)}
+            className={selected==item ? activeBtn : inactiveBtn}
+            onClick={(e) => handleSelection(e)}
           >
             {item}
           </button>
@@ -125,7 +147,10 @@ export default function Home({tweets}) {
       </div>
       <div className="container mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {allTweets && allTweets.map((item) => <TweetCard key={item._id} id={item.tweetid} />)}
+          {allTweets &&
+            allTweets.map((item) => (
+              <TweetCard key={item._id} id={item.tweetid} />
+            ))}
         </div>
       </div>
     </div>
