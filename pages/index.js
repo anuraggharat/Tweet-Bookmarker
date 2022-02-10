@@ -7,13 +7,18 @@ import Router from "next/router";
 const categories = [
   "Tech",
   "Programming",
+  "HTML",
+  "CSS",
   "JavaScript",
   "Web Development",
+  "React",
   "Database",
   "DevOps",
   "Cloud",
   "Tip & Tricks",
   "Blockchain",
+  "Web3",
+  "Resources",
   "UI/UX",
   "Cricket",
   "Lifestyle",
@@ -160,7 +165,7 @@ export default function Home({tweets}) {
 }
 export async function getServerSideProps() {
   
-  const res = await axios.get(`${process.env.API_URL}/api/tweet`)
+  const res = await axios.get(`${process.env.API_URL}/api/tweet`);
   const {data} = res
   return{
     props:data
