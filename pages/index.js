@@ -8,15 +8,17 @@ const categories = [
   "Tech",
   "Programming",
   "JavaScript",
-  "FrontEnd",
   "Web Development",
-  "Cricket",
-  "Lifestyle",
-  "BackEnd",
   "Database",
   "DevOps",
   "Cloud",
   "Tip & Tricks",
+  "Blockchain",
+  "UI/UX",
+  "Cricket",
+  "Lifestyle",
+  "Memes",
+  "Others",
 ];
 
 export default function Home({tweets}) {
